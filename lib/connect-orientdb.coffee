@@ -17,6 +17,7 @@ class OrientDBStore extends connect.session.Store
 
   constructor: (options, callback) ->
     options = options or {}
+    callback = callback or ->
 
     database = options.database || default_options.database
     
