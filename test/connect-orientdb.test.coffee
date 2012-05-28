@@ -1,4 +1,5 @@
-OrientDBStore = require("../index")
+connect = require("connect")
+OrientDBStore = require("../index")(connect)
 assert = require("assert")
 
 options =
