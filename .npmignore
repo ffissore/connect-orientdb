@@ -1,0 +1,9 @@
+.npmignore
+
+History.md
+Makefile
+Readme.md
+
+examples/
+support/
+test/
