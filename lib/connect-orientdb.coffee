@@ -18,10 +18,12 @@ class OrientDBStore extends connect.session.Store
   constructor: (options, callback) ->
     options = options or {}
 
+    database = options.database || default_options.database
+    
     server = new orient.Server
       host: options.host or default_options.host
       port: options.port or default_options.port
-    @db = new orient.Db options.database, server,
+    @db = new orient.Db database, server,
       user_name: options.user_name or default_options.user_name
       user_password: options.user_password or default_options.user_password
     @class_name = options.class_name or default_options.class_name
