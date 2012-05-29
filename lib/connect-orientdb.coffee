@@ -5,51 +5,55 @@
 orient = require "orientdb"
 
 default_options =
-  host: "localhost"
-  port: 2424
+  server:
+    host: "localhost"
+    port: 2424
+  db:
+    user_name: "admin"
+    user_password: "admin"
   database: "sessions"
   class_name: "Session"
-  user_name: "admin"
-  user_password: "admin"
 
 module.exports = (connect) ->
-
   class OrientDBStore extends connect.session.Store
-  
+
     constructor: (options, callback) ->
-      options = options or {}
       callback = callback or ->
-  
-      database = options.database || default_options.database
-      
-      server = new orient.Server
-        host: options.host or default_options.host
-        port: options.port or default_options.port
-      @db = new orient.Db database, server,
-        user_name: options.user_name or default_options.user_name
-        user_password: options.user_password or default_options.user_password
+
+      options = options or {}
+      options.server = options.server or {}
+      options.db = options.db or {}
+      options.server.host = options.server.host or default_options.server.host
+      options.server.port = options.server.port or default_options.server.port
+      options.db.user_name = options.db.user_name or default_options.db.user_name
+      options.db.user_password = options.db.user_password or default_options.db.user_password
+
+      server = new orient.Server options.server
+
+      @db = new orient.Db (options.database || default_options.database), server, options.db
+
       @class_name = options.class_name or default_options.class_name
-  
+
       @db.open (err) =>
         return callback(err) if err?
-  
+
         cluster = @db.getClusterByClass @class_name
         return callback(null, @) if cluster?
-  
+
         @db.createClass @class_name, (err) =>
           return callback(err) if err?
-  
+
           @db.command "CREATE PROPERTY #{@class_name}.sid STRING", (err) =>
             return callback(err) if err?
-  
+
             @db.command "CREATE INDEX #{@class_name}.sid UNIQUE", (err) =>
               return callback(err) if err?
-  
+
               @db.reload (err) =>
                 return callback(err) if err?
-  
+
                 callback(null, @)
-  
+
     load_session_doc = (self, sid, callback) ->
       self.db.command "SELECT FROM #{self.class_name} WHERE sid = '#{sid}'", (err, results) =>
         return callback(err) if err?
@@ -57,41 +61,41 @@ module.exports = (connect) ->
           callback(null, results[0])
         else
           callback()
-  
+
     get: (sid, callback) ->
       load_session_doc @, sid, (err, session_doc) =>
         return callback(err) if err?
         return callback() if !session_doc
-  
+
         if !session_doc.expires or new Date() < session_doc.expires
           callback(null, JSON.parse(session_doc.session))
         else
           @destroy(sid, callback)
-  
+
     set: (sid, session, callback) ->
       load_session_doc @, sid, (err, session_doc) =>
         session_doc = session_doc || {}
         session_doc["@class"] = session_doc["@class"] or @class_name
         session_doc.sid = sid
-  
+
         if session.cookie && session.cookie._expires
           session_doc.expires = new Date(session.cookie._expires)
 
         session_doc.session = JSON.stringify(session)
         @db.save(session_doc, callback)
-  
+
     destroy: (sid, callback) ->
       load_session_doc @, sid, (err, session_doc) =>
         @db.delete session_doc, callback
-  
+
     length: (callback) ->
       clusterName = @db.getClusterByClass(@class_name).name
       @db.countRecordsInCluster clusterName, callback
-  
+
     clear: (callback) ->
       @db.command "DELETE FROM #{@class_name}", callback
-  
+
     close: (callback) ->
       @db.close callback
-      
+
   return OrientDBStore
