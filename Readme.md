@@ -1,6 +1,6 @@
 # connect-orientdb
 
-  OrientDB session store for Connect
+  [OrientDB](https://code.google.com/p/orient/) session store for Connect  
   Code is a CoffeeScript port to OrientDB from [connect-mongo](https://github.com/kcbanner/connect-mongo)
 
 ## Installation
