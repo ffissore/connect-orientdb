@@ -15,7 +15,7 @@ exports.test_set = (done) ->
 
       store.db.command "select from Session where sid = '#{sid}'", (err, results) ->
         assert.equal sid, results[0].sid
-        assert.equal "bar", JSON.parse(results[0].session).foo
+        assert.equal "bar", results[0].session.foo
 
         store.clear ->
           done()
@@ -33,7 +33,7 @@ exports.test_set_expires = (done) ->
 
       store.db.command "select from Session where sid = '#{sid}'", (err, results) ->
         assert.equal sid, results[0].sid
-        assert.equal "bar", JSON.parse(results[0].session).foo
+        assert.equal "bar", results[0].session.foo
         assert.equal(session.expires.toJSON(), new Date(data.cookie._expires).toJSON());
 
         store.clear ->

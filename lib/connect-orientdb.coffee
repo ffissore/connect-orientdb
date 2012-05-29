@@ -68,7 +68,7 @@ module.exports = (connect) ->
         return callback() if !session_doc
 
         if !session_doc.expires or new Date() < session_doc.expires
-          callback(null, JSON.parse(session_doc.session))
+          callback(null, session_doc.session)
         else
           @destroy(sid, callback)
 
@@ -77,11 +77,12 @@ module.exports = (connect) ->
         session_doc = session_doc || {}
         session_doc["@class"] = session_doc["@class"] or @class_name
         session_doc.sid = sid
+        delete session_doc["@version"]
 
         if session.cookie && session.cookie._expires
           session_doc.expires = new Date(session.cookie._expires)
 
-        session_doc.session = JSON.stringify(session)
+        session_doc.session = JSON.parse(JSON.stringify(session))
         @db.save(session_doc, callback)
 
     destroy: (sid, callback) ->
