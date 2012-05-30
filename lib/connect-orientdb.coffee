@@ -83,13 +83,15 @@ module.exports = (connect) ->
         session_doc = session_doc || {}
         session_doc["@class"] = session_doc["@class"] or @class_name
         session_doc.sid = sid
-        delete session_doc["@version"]
+        session_doc["@version"] = -2
 
         if session.cookie && session.cookie._expires
           session_doc.expires = new Date(session.cookie._expires)
 
         session_doc.session = JSON.parse(JSON.stringify(session))
-        @db.save(session_doc, callback)
+        @db.save session_doc, (err, session_doc) ->
+          return callback(err) if err?
+          callback(null, session_doc.session)
 
     destroy: (sid, callback) ->
       load_session_doc @, sid, (err, session_doc) =>
