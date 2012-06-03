@@ -52,13 +52,13 @@ module.exports = (connect) ->
               @db.command "ALTER PROPERTY #{@class_name}.sid NOTNULL true", (err) =>
                 return callback(err) if err?
 
-                @db.command "CREATE INDEX #{@class_name}.sid UNIQUE", (err) =>
+#                @db.command "CREATE INDEX #{@class_name}.sid UNIQUE", (err) =>
+#                  return callback(err) if err?
+
+                @db.reload (err) =>
                   return callback(err) if err?
 
-                  @db.reload (err) =>
-                    return callback(err) if err?
-
-                    callback(null, @)
+                  callback(null, @)
 
     load_session_doc = (self, sid, callback) ->
       self.db.command "SELECT FROM #{self.class_name} WHERE sid = '#{sid}'", (err, results) =>
