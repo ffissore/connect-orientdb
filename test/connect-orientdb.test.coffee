@@ -27,14 +27,14 @@ exports.test_set_expires = (done) ->
       foo: "bar"
       cookie:
         _expires: "2011-04-26T03:10:12.000Z"
-        
+
     store.set sid, data, (err, session) ->
       assert.strictEqual err, null
 
       store.db.command "select from Session where sid = '#{sid}'", (err, results) ->
         assert.equal sid, results[0].sid
         assert.equal "bar", results[0].session.foo
-        assert.equal(session.expires.toJSON(), new Date(data.cookie._expires).toJSON());
+        assert.equal(results[0].expires.toJSON(), new Date(data.cookie._expires).toJSON())
 
         store.clear ->
           done()
@@ -95,5 +95,5 @@ exports.test_set_length_clear = (done) ->
         store.clear ->
           store.length (err, count) ->
             assert.equal 0, count
-    
+
             done()
