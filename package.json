@@ -1,6 +1,6 @@
 {
   "name": "connect-orientdb",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "OrientDB session store for Connect",
   "keywords": ["connect", "orientdb", "orient", "session", "express"],
   "author": "Federico Fissore <federico@fissore.org>",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "coffee-script": ">= 1.3.1",
-    "orientdb": "git://github.com/ffissore/node-orientdb.git#master"
+    "orientdb": ">= 0.9.0"
   },
   "devDependencies": {
     "mocha": "1.x",
