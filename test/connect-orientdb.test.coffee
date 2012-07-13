@@ -97,3 +97,21 @@ exports.test_set_length_clear = (done) ->
             assert.equal 0, count
 
             done()
+
+exports.test_load = (done) ->
+  this.timeout(0)
+  new OrientDBStore options, (err, store) ->
+    sid = "test_load-sid"
+    data =
+      foo: "bar"
+      cookie:
+        _expires: new Date()
+
+    store.set sid, data, (err, session) ->
+      number_of_calls = 10000
+      number_of_calls_done = 0
+      for i in [0...number_of_calls]
+        store.set sid, data, (err, session) ->
+          number_of_calls_done++
+          assert !err?, ["number_of_calls_done #{number_of_calls_done}", err]
+          done() if number_of_calls_done is number_of_calls
