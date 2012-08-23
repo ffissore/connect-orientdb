@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/ffissore/connect-orientdb.png)](http://travis-ci.org/ffissore/connect-orientdb)
 # connect-orientdb
 
   [OrientDB](https://code.google.com/p/orient/) session store for Connect (or Connect based, like Express)  
