@@ -57,14 +57,14 @@ module.exports = (connect) ->
 
                   @db.reload (err) =>
                     return callback(err) if err?
-
+  
                     callback(null, @)
 
     load_session_doc = (self, sid, callback) ->
-      self.db.command "SELECT FROM #{self.class_name} WHERE sid = '#{sid}'", (err, results) =>
+      self.db.command "SELECT FROM index:#{self.class_name}.sid WHERE key = '#{sid}'", { fetchPlan: "*:-1" }, (err, results) =>
         return callback(err) if err?
         if results.length > 0
-          callback(null, results[0])
+          callback(null, results[0].rid)
         else
           callback()
 
