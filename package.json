@@ -1,6 +1,6 @@
 {
   "name": "connect-orientdb",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "OrientDB session store for Connect",
   "keywords": ["connect", "orientdb", "orient", "session", "express"],
   "author": "Federico Fissore <federico@fissore.org>",
