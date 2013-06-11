@@ -4,6 +4,9 @@
 
 orient = require "orientdb"
 
+TEN_MINUTES = 10 * 60 * 1000
+TWO_HOURS = 2 * 60 * 60 * 1000
+
 default_options =
   server:
     host: "localhost"
@@ -13,6 +16,7 @@ default_options =
     user_password: "admin"
   database: "sessions"
   class_name: "Session"
+  reap_interval: TEN_MINUTES
 
 module.exports = (connect) ->
   class OrientDBStore extends connect.session.Store
@@ -57,7 +61,10 @@ module.exports = (connect) ->
 
                   @db.reload (err) =>
                     return callback(err) if err?
-  
+
+                    if options.reap_interval > 0
+                      setInterval(@reap_expired, options.reap_interval)
+
                     callback(null, @)
 
     load_session_doc = (self, sid, callback) ->
@@ -87,6 +94,10 @@ module.exports = (connect) ->
 
         if session.cookie && session.cookie._expires
           session_doc.expires = new Date(session.cookie._expires)
+        else if session.cookie? and typeof session.cookie.maxAge is "number"
+          session_doc.expires = new Date(+new Date() + session.cookie.maxAge)
+        else
+          session_doc.expires = new Date(+new Date() + (TWO_HOURS))
 
         session_doc.session = JSON.parse(JSON.stringify(session))
         @db.save session_doc, (err, session_doc) ->
@@ -106,5 +117,8 @@ module.exports = (connect) ->
 
     close: (callback) ->
       @db.close callback
+
+    reap_expired: (callback) =>
+      @db.command "DELETE FROM #{@class_name} WHERE expires < #{new Date()}", callback
 
   return OrientDBStore

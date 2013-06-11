@@ -4,6 +4,7 @@ assert = require("assert")
 
 options =
   database: "temp"
+  reap_interval: 100
 
 exports.test_set = (done) ->
   new OrientDBStore options, (err, store) ->
