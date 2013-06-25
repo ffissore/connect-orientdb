@@ -31,6 +31,7 @@ module.exports = (connect) ->
       options.server.port = options.server.port or default_options.server.port
       options.db.user_name = options.db.user_name or default_options.db.user_name
       options.db.user_password = options.db.user_password or default_options.db.user_password
+      options.reap_interval = options.reap_interval or default_options.reap_interval
 
       server = new orient.Server options.server
 
