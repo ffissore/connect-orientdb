@@ -38,34 +38,37 @@ module.exports = (connect) ->
 
       @class_name = options.class_name or default_options.class_name
 
-      @db.open (err) =>
+      setup_schema @, (err) =>
         return callback(err) if err?
 
-        cluster = @db.getClusterByClass @class_name
-        return callback(null, @) if cluster?
+        if options.reap_interval > 0
+          setInterval(@reap_expired, options.reap_interval)
 
-        @db.createClass @class_name, (err) =>
+        callback(null, @)
+
+    setup_schema = (self, callback) ->
+      self.db.open (err) =>
+        return callback(err) if err?
+
+        cluster = self.db.getClusterByClass self.class_name
+        return callback() if cluster?
+
+        self.db.createClass self.class_name, (err) =>
           return callback(err) if err?
 
-          @db.command "CREATE PROPERTY #{@class_name}.sid STRING", (err) =>
+          self.db.command "CREATE PROPERTY #{self.class_name}.sid STRING", (err) =>
             return callback(err) if err?
 
-            @db.command "ALTER PROPERTY #{@class_name}.sid MANDATORY true", (err) =>
+            self.db.command "ALTER PROPERTY #{self.class_name}.sid MANDATORY true", (err) =>
               return callback(err) if err?
 
-              @db.command "ALTER PROPERTY #{@class_name}.sid NOTNULL true", (err) =>
+              self.db.command "ALTER PROPERTY #{self.class_name}.sid NOTNULL true", (err) =>
                 return callback(err) if err?
 
-                @db.command "CREATE INDEX #{@class_name}.sid UNIQUE", (err) =>
+                self.db.command "CREATE INDEX #{self.class_name}.sid UNIQUE", (err) =>
                   return callback(err) if err?
 
-                  @db.reload (err) =>
-                    return callback(err) if err?
-
-                    if options.reap_interval > 0
-                      setInterval(@reap_expired, options.reap_interval)
-
-                    callback(null, @)
+                  self.db.reload(callback)
 
     load_session_doc = (self, sid, callback) ->
       self.db.command "SELECT FROM index:#{self.class_name}.sid WHERE key = '#{sid}'", { fetchPlan: "*:-1" }, (err, results) =>
@@ -119,6 +122,6 @@ module.exports = (connect) ->
       @db.close callback
 
     reap_expired: (callback) =>
-      @db.command "DELETE FROM #{@class_name} WHERE expires < #{new Date()}", callback
+      @db.command "DELETE FROM #{@class_name} WHERE expires < #{new Date().getTime()}", callback
 
   return OrientDBStore
